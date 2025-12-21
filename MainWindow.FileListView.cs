@@ -4,6 +4,8 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Diagnostics;
+using System.ComponentModel;
+using System.Windows.Data;
 
 /*
 * FileListViewの初期化とイベントハンドラ
@@ -156,4 +158,47 @@ sw.Stop();
         SetFileListViewDirectory(_currentDirectory);
     }
 
+    /*
+    * 列ヘッダクリックでソート
+    */
+    private ListSortDirection _nameSortDirection = ListSortDirection.Ascending;
+    private ListSortDirection _sizeSortDirection = ListSortDirection.Ascending;
+    private void NameHeader_Click(object sender, RoutedEventArgs e)
+    {
+        var view = CollectionViewSource.GetDefaultView(FileListView.ItemsSource);
+        if (view == null) return;
+
+        view.SortDescriptions.Clear();
+        // 第1キー：種類
+        view.SortDescriptions.Add(
+            new SortDescription(nameof(FileItem.Type), _nameSortDirection));
+        // 第2キー：名前
+        view.SortDescriptions.Add(
+            new SortDescription(nameof(FileItem.Name), _nameSortDirection));
+
+        // 次回クリック用に反転
+        _nameSortDirection =
+            _nameSortDirection == ListSortDirection.Ascending
+                ? ListSortDirection.Descending
+                : ListSortDirection.Ascending;
+    }
+    private void SizeHeader_Click(object sender, RoutedEventArgs e)
+    {
+        var view = CollectionViewSource.GetDefaultView(FileListView.ItemsSource);
+        if (view == null) return;
+
+        view.SortDescriptions.Clear();
+        // 第1キー：種類
+        view.SortDescriptions.Add(
+            new SortDescription(nameof(FileItem.Type), _sizeSortDirection));
+        // 第2キー：サイズ
+        view.SortDescriptions.Add(
+            new SortDescription(nameof(FileItem.Size), _sizeSortDirection));
+
+        // 次回クリック用に反転
+        _sizeSortDirection =
+            _sizeSortDirection == ListSortDirection.Ascending
+                ? ListSortDirection.Descending
+                : ListSortDirection.Ascending;
+    }
 }

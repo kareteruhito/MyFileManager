@@ -146,17 +146,34 @@
 
                     <ListView.View>
                         <GridView>
-                            <GridViewColumn Header="名前" Width="300"
-                                            DisplayMemberBinding="{Binding Name}" />
-                            <GridViewColumn Header="種類" Width="100"
-                                            DisplayMemberBinding="{Binding Type}" />
+                            <GridViewColumn Width="300">
+                                <GridViewColumnHeader
+                                    Content="名前"
+                                    Click="NameHeader_Click"
+                                    HorizontalContentAlignment="Left"/>
+                                <GridViewColumn.DisplayMemberBinding>
+                                    <Binding Path="Name"/>
+                                </GridViewColumn.DisplayMemberBinding>
+                            </GridViewColumn>
                             <GridViewColumn Width="100">
-                                <GridViewColumnHeader Content="サイズ"
-                                                        HorizontalContentAlignment="Right"/>
+                                <GridViewColumnHeader
+                                    Content="種類"
+                                    Click="NameHeader_Click"
+                                    HorizontalContentAlignment="Left"/>
+                                <GridViewColumn.DisplayMemberBinding>
+                                    <Binding Path="Type"/>
+                                </GridViewColumn.DisplayMemberBinding>
+                            </GridViewColumn>
+                            <GridViewColumn Width="100">
+                                <GridViewColumnHeader
+                                    Content="サイズ"
+                                    Click="SizeHeader_Click"
+                                    HorizontalContentAlignment="Right"/>
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
-                                        <TextBlock Text="{Binding Size}"
-                                                HorizontalAlignment="Right"/>
+                                        <TextBlock
+                                            Text="{Binding Size}"
+                                            HorizontalAlignment="Right"/>
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
