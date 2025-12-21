@@ -5,17 +5,20 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MyFileManager"
         mc:Ignorable="d"
+        FontSize="14"
         Title="MyFileManager" Height="450" Width="800">
 
     <Window.Resources>
         <local:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+        <Style TargetType="MenuItem">
+            <Setter Property="FontSize" Value="16"/>
+        </Style>
     </Window.Resources>
 
     <DockPanel>
 
         <!-- メニュー ここから-->
         <Menu
-            FontSize="14"
             DockPanel.Dock="Top">
             <MenuItem Header="_File">
                 <MenuItem Header="_New Window" Click="OnNewWindow"/>
@@ -35,7 +38,6 @@
 
         <!-- ステータスバー -->
         <StatusBar
-            FontSize="14"
             DockPanel.Dock="Bottom">
             <StatusBarItem>
                 <TextBlock x:Name="StatusText"
@@ -57,16 +59,20 @@
             <DockPanel
                 DockPanel.Dock="Top"
                 Margin="8">
+                <!-- 上ボタン -->
+                <Button Content="↑"
+                        DockPanel.Dock="Left"
+                        Width="20"
+                        Click="UpButton_Click"/>
                 <!-- 移動ボタン -->
                 <Button Content="移動"
                         DockPanel.Dock="Right"
-                        Width="80"
+                        Width="40"
                         Click="MoveButton_Click"/>
                 <!-- アドレスバー -->
                 <TextBox x:Name="AddressTextBox"
-                        Margin="0,0,8,0"
+                        Margin="4,0,4,0"
                         VerticalContentAlignment="Center"
-                        FontSize="14"
                         KeyDown="AddressTextBox_KeyDown"/>
             </DockPanel>
             <!-- アドレスバーと移動ボタン ここまで -->
@@ -112,7 +118,6 @@
                 <ListView
                     x:Name="FileListView"
                     Grid.Column="2"
-                    ItemsSource="{Binding FileItems}"
                     SelectionChanged="FileListView_SelectionChanged"
                     MouseDoubleClick="FileListView_MouseDoubleClick">
 

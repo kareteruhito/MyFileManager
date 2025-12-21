@@ -13,14 +13,7 @@ public partial class MainWindow : Window
 {
     public ObservableCollection<DirectoryNode> RootNodes { get; }
         = new ObservableCollection<DirectoryNode>();
-/*
-    public MainWindow()
-    {
-        InitializeComponent();
-        DataContext = this;
-        LoadRoots();
-    }
-*/
+    
     private void LoadRoots()
     {
         RootNodes.Clear();

@@ -13,10 +13,11 @@ public partial class MainWindow : Window
         LoadRoots();
 
         // FileListViewの初期化
-        LoadDirectory(_currentDirectory);
+        SetFileListViewDirectory(_currentDirectory);
 
         // AddressBarの初期化
-        SetCurrentDirectory(@"C:\");
+        SetAddressBarCurrentDirectory(_currentDirectory);
+
     }
 
     /* メニューイベントハンドラ */
@@ -52,15 +53,13 @@ public partial class MainWindow : Window
         // AddressBar更新
         if (CurrentDirectory != path)
         {
-            CurrentDirectory = path;
-            AddressTextBox.Text = path;
+            SetAddressBarCurrentDirectory(path);
         }
 
         // FileListView更新
         if (_currentDirectory != path)
         {
-            _currentDirectory = path;
-            LoadDirectory(_currentDirectory);
+            SetFileListViewDirectory(path);
         }
     }
 }

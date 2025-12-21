@@ -12,15 +12,11 @@ public partial class MainWindow : Window
 {
     public string CurrentDirectory { get; private set; } = "";
 
-/*
-    public MainWindow()
+    private void UpButton_Click(object sender, RoutedEventArgs e)
     {
-        InitializeComponent();
-
-        // 初期ディレクトリ
-        SetCurrentDirectory(@"C:\");
+        var path = Path.GetDirectoryName(CurrentDirectory) ?? CurrentDirectory;
+        SetAddressBarCurrentDirectory(path);
     }
-*/
 
     private void MoveButton_Click(object sender, RoutedEventArgs e)
     {
@@ -40,7 +36,7 @@ public partial class MainWindow : Window
     {
         if (Directory.Exists(path))
         {
-            SetCurrentDirectory(path);
+            SetAddressBarCurrentDirectory(path);
         }
         else
         {
@@ -52,14 +48,14 @@ public partial class MainWindow : Window
         }
     }
 
-    private void SetCurrentDirectory(string path)
+    // アドレスバーのカレントディレクトリ設定
+    private void SetAddressBarCurrentDirectory(string path)
     {
+        if (CurrentDirectory == path) return;
+
         CurrentDirectory = path;
         AddressTextBox.Text = path;
 
-        // 本来はここで FileListView / ListView を更新する
-        // LoadFiles(path);
-        //System.Diagnostics.Debug.WriteLine($"Navigated to: {path}");    // 確認用
         UpdateCurrentDirectory(path);
     }
 }

@@ -13,27 +13,16 @@ namespace MyFileManager;
 
 public partial class MainWindow : Window
 {
-    public ObservableCollection<FileItem> FileItems { get; }
-        = new ObservableCollection<FileItem>();
-
     private string _currentDirectory = @"C:\";
-/*
-    public MainWindow()
-    {
-        InitializeComponent();
-        DataContext = this;
 
-        LoadDirectory(_currentDirectory);
-    }
-*/
-
-    private void LoadDirectory(string path)
+    private void SetFileListViewDirectory(string path)
     {
-        FileItems.Clear();
+        _currentDirectory = path;
+        var fileItems = new ObservableCollection<FileItem>();
 
         foreach (var dir in FileSystemUtil.GetDirs(path))
         {
-            FileItems.Add(new FileItem
+            fileItems.Add(new FileItem
             {
                 Name = Path.GetFileName(dir),
                 FullPath = dir,
@@ -45,7 +34,7 @@ public partial class MainWindow : Window
         foreach (var file in FileSystemUtil.GetFiles(path))
         {
             var info = new FileInfo(file);
-            FileItems.Add(new FileItem
+            fileItems.Add(new FileItem
             {
                 Name = info.Name,
                 FullPath = info.FullName,
@@ -53,6 +42,7 @@ public partial class MainWindow : Window
                 Size = info.Length
             });
         }
+        FileListView.ItemsSource = fileItems;
     }
 
     // 選択変更（イベントドリブン）
@@ -60,7 +50,7 @@ public partial class MainWindow : Window
     {
         if (FileListView.SelectedItem is FileItem item)
         {
-            Debug.WriteLine($"Selected: {item.FullPath}");
+            //System.Diagnostics.Debug.WriteLine($"Selected: {item.FullPath}");
         }
     }
 
@@ -71,8 +61,6 @@ public partial class MainWindow : Window
         {
             if (item.Type == "Directory")
             {
-                //_currentDirectory = item.FullPath;
-                //LoadDirectory(_currentDirectory);
                 UpdateCurrentDirectory(item.FullPath);
             }
             else
@@ -111,7 +99,6 @@ public partial class MainWindow : Window
 
         if (SelectedItem.Type == "Directory")
         {
-            //LoadDirectory(SelectedItem.FullPath);
             UpdateCurrentDirectory(SelectedItem.FullPath);
         }
         else
@@ -147,7 +134,7 @@ public partial class MainWindow : Window
         else
             File.Delete(SelectedItem.FullPath);
 
-        LoadDirectory(_currentDirectory);
+        SetFileListViewDirectory(_currentDirectory);
     }
 
 }
