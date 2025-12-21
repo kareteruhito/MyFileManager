@@ -1,0 +1,2 @@
+# MyFileManager
+WPFを使ったWindows11向けファイルマネージャ
