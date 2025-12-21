@@ -15,12 +15,25 @@ public partial class MainWindow : Window
 {
     private string _currentDirectory = @"C:\";
 
-    private void SetFileListViewDirectory(string path)
+    private async void SetFileListViewDirectory(string path)
     {
+var sw = Stopwatch.StartNew();
+        FileListView.Visibility = Visibility.Collapsed;
+        StatusText.Text = "Loading...";
+
+Dispatcher.Invoke(
+    System.Windows.Threading.DispatcherPriority.Render,
+    new Action(() => { })
+);
         _currentDirectory = path;
         var fileItems = new ObservableCollection<FileItem>();
 
-        foreach (var dir in FileSystemUtil.GetDirs(path))
+        var dirTask = Task.Run(() => FileSystemUtil.GetDirs(path));
+
+        var dirs = await dirTask;
+        
+        var fileTask = Task.Run(() => FileSystemUtil.GetFiles(path));
+        foreach (var dir in dirs)
         {
             fileItems.Add(new FileItem
             {
@@ -31,7 +44,8 @@ public partial class MainWindow : Window
             });
         }
 
-        foreach (var file in FileSystemUtil.GetFiles(path))
+        var files = await fileTask;
+        foreach (var file in files)
         {
             var info = new FileInfo(file);
             fileItems.Add(new FileItem
@@ -43,6 +57,11 @@ public partial class MainWindow : Window
             });
         }
         FileListView.ItemsSource = fileItems;
+        FileListView.UpdateLayout();
+
+        FileListView.Visibility = Visibility.Visible;
+sw.Stop();
+        StatusText.Text = $"LoadingTime : {sw.ElapsedMilliseconds} ms";
     }
 
     // 選択変更（イベントドリブン）
