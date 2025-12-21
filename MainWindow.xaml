@@ -1,0 +1,168 @@
+﻿<Window x:Class="MyFileManager.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:MyFileManager"
+        mc:Ignorable="d"
+        Title="MyFileManager" Height="450" Width="800">
+
+    <Window.Resources>
+        <local:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+    </Window.Resources>
+
+    <DockPanel>
+
+        <!-- メニュー ここから-->
+        <Menu
+            FontSize="14"
+            DockPanel.Dock="Top">
+            <MenuItem Header="_File">
+                <MenuItem Header="_New Window" Click="OnNewWindow"/>
+                <Separator/>
+                <MenuItem Header="_Exit" Click="OnExit"/>
+            </MenuItem>
+
+            <MenuItem Header="_View">
+                <MenuItem Header="Refresh" Click="OnRefresh"/>
+            </MenuItem>
+
+            <MenuItem Header="_Help">
+                <MenuItem Header="_About" Click="OnAbout"/>
+            </MenuItem>
+        </Menu>
+        <!-- メニュー ここまで-->
+
+        <!-- ステータスバー -->
+        <StatusBar
+            FontSize="14"
+            DockPanel.Dock="Bottom">
+            <StatusBarItem>
+                <TextBlock x:Name="StatusText"
+                           Text="Ready"/>
+            </StatusBarItem>
+
+            <Separator/>
+
+            <StatusBarItem HorizontalAlignment="Right">
+                <TextBlock x:Name="PathText"
+                           Text="C:\"/>
+            </StatusBarItem>
+        </StatusBar>
+        <!-- ステータスバー ここまで-->
+
+
+        <DockPanel>
+            <!-- アドレスバーと移動ボタン ここから -->
+            <DockPanel
+                DockPanel.Dock="Top"
+                Margin="8">
+                <!-- 移動ボタン -->
+                <Button Content="移動"
+                        DockPanel.Dock="Right"
+                        Width="80"
+                        Click="MoveButton_Click"/>
+                <!-- アドレスバー -->
+                <TextBox x:Name="AddressTextBox"
+                        Margin="0,0,8,0"
+                        VerticalContentAlignment="Center"
+                        FontSize="14"
+                        KeyDown="AddressTextBox_KeyDown"/>
+            </DockPanel>
+            <!-- アドレスバーと移動ボタン ここまで -->
+
+            <Grid>
+
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="220" />
+                    <ColumnDefinition Width="5" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                
+                <!-- 左側フォルダツリー ここから -->
+                <TreeView x:Name="FolderTree"
+                        ItemsSource="{Binding RootNodes}"
+                        SelectedItemChanged="FolderTree_SelectedItemChanged"
+                        Grid.Column="0">
+
+                    <TreeView.ItemTemplate>
+                        <HierarchicalDataTemplate ItemsSource="{Binding Children}">
+                            <TextBlock Text="{Binding Name}"
+                                    Visibility="{Binding IsDummy,
+                                                    Converter={StaticResource BoolToVisibilityConverter},
+                                                    ConverterParameter=Invert}" />
+                        </HierarchicalDataTemplate>
+                    </TreeView.ItemTemplate>
+                    <TreeView.ItemContainerStyle>
+                        <Style TargetType="TreeViewItem">
+                            <EventSetter Event="Expanded"
+                                        Handler="FolderTreeItem_Expanded"/>
+                        </Style>
+                    </TreeView.ItemContainerStyle>
+                </TreeView>
+                <!-- 左側フォルダツリー ここまで -->
+
+                <!-- 左右の仕切り ここから-->
+                <GridSplitter
+                    Grid.Column="1"
+                    HorizontalAlignment="Stretch" />  
+                <!-- 左右の仕切り ここまで-->
+
+                <!-- 右側ファイルリストビュー ここから -->
+                <ListView
+                    x:Name="FileListView"
+                    Grid.Column="2"
+                    ItemsSource="{Binding FileItems}"
+                    SelectionChanged="FileListView_SelectionChanged"
+                    MouseDoubleClick="FileListView_MouseDoubleClick">
+
+                    <!-- コンテキストメニュー ここから -->
+                    <ListView.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="開く"
+                                    Click="Menu_Open_Click" />
+                            <MenuItem Header="エクスプローラーで開く"
+                                    Click="Menu_OpenInExplorer_Click" />
+                            <Separator/>
+                            <MenuItem Header="削除"
+                                    Click="Menu_Delete_Click" />
+                        </ContextMenu>
+                    </ListView.ContextMenu>
+                    <!-- コンテキストメニュー ここまで -->
+                    
+                    <ListView.ItemContainerStyle>
+                        <Style TargetType="ListViewItem">
+                            <Setter
+                                Property="HorizontalContentAlignment"
+                                Value="Stretch"/>
+                        </Style>
+                    </ListView.ItemContainerStyle>
+
+
+                    <ListView.View>
+                        <GridView>
+                            <GridViewColumn Header="名前" Width="300"
+                                            DisplayMemberBinding="{Binding Name}" />
+                            <GridViewColumn Header="種類" Width="100"
+                                            DisplayMemberBinding="{Binding Type}" />
+                            <GridViewColumn Width="100">
+                                <GridViewColumnHeader Content="サイズ"
+                                                        HorizontalContentAlignment="Right"/>
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Size}"
+                                                HorizontalAlignment="Right"/>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+
+                        </GridView>
+                    </ListView.View>
+                </ListView>
+                <!-- 右側ファイルリストビュー ここまで -->
+
+            </Grid>
+        </DockPanel>
+
+    </DockPanel>
+</Window>
