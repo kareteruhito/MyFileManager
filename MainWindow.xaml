@@ -118,19 +118,29 @@
                 <ListView
                     x:Name="FileListView"
                     Grid.Column="2"
+                    MouseRightButtonUp="FileListView_MouseRightButtonUp"
                     SelectionChanged="FileListView_SelectionChanged"
                     MouseDoubleClick="FileListView_MouseDoubleClick">
 
                     <!-- コンテキストメニュー ここから -->
                     <ListView.ContextMenu>
-                        <ContextMenu>
+                        <ContextMenu x:Name="FileContextMenu"
+                                     Opened="FileContextMenu_Opening">
+                            <MenuItem Header="コピー"
+                                Click="Copy_Click"/>
+                            <MenuItem Header="切り取り"
+                                Click="Cut_Click"/>
+                            <Separator/>
+                            <MenuItem Header="貼り付け"
+                                Click="Paste_Click"/>
+                            <Separator/>
                             <MenuItem Header="開く"
-                                    Click="Menu_Open_Click" />
+                                Click="Menu_Open_Click" />
                             <MenuItem Header="エクスプローラーで開く"
-                                    Click="Menu_OpenInExplorer_Click" />
+                                Click="Menu_OpenInExplorer_Click" />
                             <Separator/>
                             <MenuItem Header="削除"
-                                    Click="Menu_Delete_Click" />
+                                Click="Menu_Delete_Click" />
                         </ContextMenu>
                     </ListView.ContextMenu>
                     <!-- コンテキストメニュー ここまで -->
