@@ -360,4 +360,95 @@ sw.Stop();
             item.IsSelected = true;
         }
     }
+    /*
+    * 新しいいフォルダ作成・名前変更
+    */
+    // 新しいフォルダ作成
+    private void NewFolder_Click(object sender, RoutedEventArgs e)
+    {
+        CreateNewDirectory();
+    }
+    // 名前変更
+    private void Rename_Click(object sender, RoutedEventArgs e)
+    {
+        if (FileListView.SelectedItem is FileItem item)
+            RenameItem(item);
+    }
+    // 仮名ディレクトリ名生成
+    private string CreateUniqueFolderName(string basePath, string baseName = "NewFolder")
+    {
+        string path = Path.Combine(basePath, baseName);
+        int index = 1;
+
+        while (Directory.Exists(path))
+        {
+            path = Path.Combine(basePath, $"{baseName} ({index})");
+            index++;
+        }
+        return path;
+    }
+    // 名前変更ダイアログ表示
+    private void CreateNewDirectory()
+    {
+        string parent = CurrentDirectory;
+        string tempPath = CreateUniqueFolderName(parent);
+
+        try
+        {
+            Directory.CreateDirectory(tempPath);
+
+            var dlg = new RenameDialog(Path.GetFileName(tempPath))
+            {
+                Owner = this
+            };
+
+            if (dlg.ShowDialog() == true)
+            {
+                string newPath = Path.Combine(parent, dlg.ResultName);
+                if (tempPath != newPath)
+                    Directory.Move(tempPath, newPath);
+            }
+            else
+            {
+                // キャンセル時は削除
+                Directory.Delete(tempPath);
+            }
+
+            SetFileListViewDirectory(_currentDirectory);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(ex.Message, "ディレクトリ作成エラー");
+        }
+    }
+    // 名前変更処理
+    private void RenameItem(FileItem item)
+    {
+        var dlg = new RenameDialog(item.Name)
+        {
+            Owner = this
+        };
+
+        if (dlg.ShowDialog() != true)
+            return;
+
+        string newPath = Path.Combine(
+            Path.GetDirectoryName(item.FullPath)!,
+            dlg.ResultName);
+
+        try
+        {
+            if (Directory.Exists(item.FullPath))
+                Directory.Move(item.FullPath, newPath);
+            else if (File.Exists(item.FullPath))
+                File.Move(item.FullPath, newPath);
+
+            SetFileListViewDirectory(_currentDirectory);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(ex.Message, "名前の変更エラー");
+        }
+    }
+
 }

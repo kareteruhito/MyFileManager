@@ -141,6 +141,10 @@
                             <Separator/>
                             <MenuItem Header="削除"
                                 Click="Menu_Delete_Click" />
+                            <MenuItem Header="新しいフォルダ"
+                                    Click="NewFolder_Click"/>
+                            <MenuItem Header="名前の変更"
+                                    Click="Rename_Click"/>
                         </ContextMenu>
                     </ListView.ContextMenu>
                     <!-- コンテキストメニュー ここまで -->
