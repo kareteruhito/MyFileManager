@@ -16,19 +16,20 @@ namespace MyFileManager;
 
 public partial class MainWindow : Window
 {
-    private string _currentDirectory = @"C:\";
+    private string _fileListViewCurrentDirectory = @"C:\";
 
     private async void SetFileListViewDirectory(string path)
     {
-var sw = Stopwatch.StartNew();
-        FileListView.Visibility = Visibility.Collapsed;
-        StatusText.Text = "Loading...";
+        var sw = Stopwatch.StartNew();
+                FileListView.Visibility = Visibility.Collapsed;
+                StatusText.Text = "Loading...";
 
-Dispatcher.Invoke(
-    System.Windows.Threading.DispatcherPriority.Render,
-    new Action(() => { })
-);
-        _currentDirectory = path;
+        Dispatcher.Invoke(
+            System.Windows.Threading.DispatcherPriority.Render,
+            new Action(() => { })
+        );
+
+        _fileListViewCurrentDirectory = path;
         var fileItems = new ObservableCollection<FileItem>();
 
         var dirTask = Task.Run(() => FileSystemUtil.GetDirs(path));
@@ -63,7 +64,7 @@ Dispatcher.Invoke(
         FileListView.UpdateLayout();
 
         FileListView.Visibility = Visibility.Visible;
-sw.Stop();
+        sw.Stop();
         StatusText.Text = $"LoadingTime : {sw.ElapsedMilliseconds} ms";
     }
 
@@ -156,7 +157,7 @@ sw.Stop();
         else
             File.Delete(SelectedItem.FullPath);
 
-        SetFileListViewDirectory(_currentDirectory);
+        SetFileListViewDirectory(_fileListViewCurrentDirectory);
     }
 
     /*
@@ -256,7 +257,7 @@ sw.Stop();
     {
         if (_clipboard.Operation == FileOperation.None) return;
 
-        string destDir = _currentDirectory; // カレントディレクトリ
+        string destDir = _fileListViewCurrentDirectory; // カレントディレクトリ
 
         foreach (var src in _clipboard.Paths)
         {
@@ -302,7 +303,7 @@ sw.Stop();
         _clipboard.Operation = FileOperation.None;
 
         // 既存の一覧更新処理
-        SetFileListViewDirectory(_currentDirectory);
+        SetFileListViewDirectory(_fileListViewCurrentDirectory);
     }
     // コンテキストメニュー表示前処理
     void FileContextMenu_Opening(object sender, RoutedEventArgs e)
@@ -390,7 +391,7 @@ sw.Stop();
     // 名前変更ダイアログ表示
     private void CreateNewDirectory()
     {
-        string parent = CurrentDirectory;
+        string parent = AddressBarCurrentDirectory;
         string tempPath = CreateUniqueFolderName(parent);
 
         try
@@ -414,7 +415,7 @@ sw.Stop();
                 Directory.Delete(tempPath);
             }
 
-            SetFileListViewDirectory(_currentDirectory);
+            SetFileListViewDirectory(_fileListViewCurrentDirectory);
         }
         catch (Exception ex)
         {
@@ -443,7 +444,7 @@ sw.Stop();
             else if (File.Exists(item.FullPath))
                 File.Move(item.FullPath, newPath);
 
-            SetFileListViewDirectory(_currentDirectory);
+            SetFileListViewDirectory(_fileListViewCurrentDirectory);
         }
         catch (Exception ex)
         {

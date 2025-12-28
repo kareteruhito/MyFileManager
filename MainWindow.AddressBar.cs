@@ -10,11 +10,11 @@ namespace MyFileManager;
 
 public partial class MainWindow : Window
 {
-    public string CurrentDirectory { get; private set; } = "";
+    public string AddressBarCurrentDirectory { get; private set; } = "";
 
     private void UpButton_Click(object sender, RoutedEventArgs e)
     {
-        var path = Path.GetDirectoryName(CurrentDirectory) ?? CurrentDirectory;
+        var path = Path.GetDirectoryName(AddressBarCurrentDirectory) ?? AddressBarCurrentDirectory;
         SetAddressBarCurrentDirectory(path);
     }
 
@@ -51,9 +51,9 @@ public partial class MainWindow : Window
     // アドレスバーのカレントディレクトリ設定
     private void SetAddressBarCurrentDirectory(string path)
     {
-        if (CurrentDirectory == path) return;
+        if (AddressBarCurrentDirectory == path) return;
 
-        CurrentDirectory = path;
+        AddressBarCurrentDirectory = path;
         AddressTextBox.Text = path;
 
         UpdateCurrentDirectory(path);
