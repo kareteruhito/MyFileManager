@@ -16,10 +16,31 @@ namespace MyFileManager;
 
 public partial class MainWindow : Window
 {
-    private string _fileListViewCurrentDirectory = @"C:\";
-
-    private async void SetFileListViewDirectory(string path)
+    // FileListViewのカレントディレクトリを取得
+    private string GetFileListViewCurrentDirectory()
     {
+        var currentDirectory = FileListView.Tag as string;
+        return currentDirectory ?? Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+    }
+    // FileListViewのカレントディレクトリを設定
+    private void SetFileListViewCurrentDirectory(string path)
+    {
+        var currentDirectory = GetFileListViewCurrentDirectory();
+        if (currentDirectory == path) return;
+        
+        FileListView.Tag = path;
+        AddressTextBox.Text = path;
+
+        ReloadFileListView(path);
+    }
+    // FileListViewの内容を再読み込み
+    private async void ReloadFileListView(string? path = null)
+    {
+        if (path is null)
+        {
+            path = GetFileListViewCurrentDirectory();
+        }
+        
         var sw = Stopwatch.StartNew();
                 FileListView.Visibility = Visibility.Collapsed;
                 StatusText.Text = "Loading...";
@@ -29,7 +50,6 @@ public partial class MainWindow : Window
             new Action(() => { })
         );
 
-        _fileListViewCurrentDirectory = path;
         var fileItems = new ObservableCollection<FileItem>();
 
         var dirTask = Task.Run(() => FileSystemUtil.GetDirs(path));
@@ -68,15 +88,6 @@ public partial class MainWindow : Window
         StatusText.Text = $"LoadingTime : {sw.ElapsedMilliseconds} ms";
     }
 
-    // 選択変更（イベントドリブン）
-    private void FileListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
-    {
-        if (FileListView.SelectedItem is FileItem item)
-        {
-            //System.Diagnostics.Debug.WriteLine($"Selected: {item.FullPath}");
-        }
-    }
-
     // ダブルクリック処理
     private void FileListView_MouseDoubleClick(object sender, MouseButtonEventArgs e)
     {
@@ -106,7 +117,7 @@ public partial class MainWindow : Window
 
         while (element != null && element is not ListViewItem)
         {
-            element = System.Windows.Media.VisualTreeHelper.GetParent(element);
+            element = VisualTreeHelper.GetParent(element);
         }
 
         if (element is ListViewItem item)
@@ -114,50 +125,6 @@ public partial class MainWindow : Window
             item.IsSelected = true;
             item.Focus();
         }
-    }
-
-    private void Menu_Open_Click(object sender, RoutedEventArgs e)
-    {
-        if (SelectedItem == null) return;
-
-        if (SelectedItem.Type == "Directory")
-        {
-            UpdateCurrentDirectory(SelectedItem.FullPath);
-        }
-        else
-        {
-            Process.Start(new ProcessStartInfo
-            {
-                FileName = SelectedItem.FullPath,
-                UseShellExecute = true
-            });
-        }
-    }
-
-    private void Menu_OpenInExplorer_Click(object sender, RoutedEventArgs e)
-    {
-        if (SelectedItem == null) return;
-
-        Process.Start("explorer.exe", $"/select,\"{SelectedItem.FullPath}\"");
-    }
-
-    private void Menu_Delete_Click(object sender, RoutedEventArgs e)
-    {
-        if (SelectedItem == null) return;
-
-        if (MessageBox.Show(
-            $"{SelectedItem.Name} を削除しますか？",
-            "確認",
-            MessageBoxButton.YesNo,
-            MessageBoxImage.Warning) != MessageBoxResult.Yes)
-            return;
-
-        if (SelectedItem.Type == "Directory")
-            Directory.Delete(SelectedItem.FullPath, true);
-        else
-            File.Delete(SelectedItem.FullPath);
-
-        SetFileListViewDirectory(_fileListViewCurrentDirectory);
     }
 
     /*
@@ -202,254 +169,6 @@ public partial class MainWindow : Window
             _sizeSortDirection == ListSortDirection.Ascending
                 ? ListSortDirection.Descending
                 : ListSortDirection.Ascending;
-    }
-
-    /*
-    * コピー・カット＆ペースト処理(アプリ内クリップボード)
-    */
-
-    // クリップボードの内容
-    enum FileOperation
-    {
-        None,
-        Copy,
-        Cut
-    }
-
-    // ファイルクリップボード
-    class FileClipboard
-    {
-        public FileOperation Operation { get; set; } = FileOperation.None;
-        public List<string> Paths { get; } = new();
-    }
-    
-    // 選択中のファイルを取得
-    List<string> GetSelectedPaths()
-    {
-        return FileListView.SelectedItems
-            .Cast<FileItem>()
-            .Select(x => x.FullPath)
-            .ToList();
-    }
-    private FileClipboard _clipboard = new FileClipboard();
-    // 「コピー」メニュー項目クリック
-    void Copy_Click(object sender, RoutedEventArgs e)
-    {
-        SetClipboard(FileOperation.Copy);
-    }
-    // 「切り取り」メニュー項目クリック
-    void Cut_Click(object sender, RoutedEventArgs e)
-    {
-        SetClipboard(FileOperation.Cut);
-    }
-    // クリップボードに選択中のファイルをセット
-    void SetClipboard(FileOperation op)
-    {
-        var paths = GetSelectedPaths();
-        if (paths.Count == 0) return;
-
-        _clipboard.Paths.Clear();
-        _clipboard.Paths.AddRange(paths);
-        _clipboard.Operation = op;
-    }
-    // 「貼り付け」メニュー項目クリック
-    void Paste_Click(object sender, RoutedEventArgs e)
-    {
-        if (_clipboard.Operation == FileOperation.None) return;
-
-        string destDir = _fileListViewCurrentDirectory; // カレントディレクトリ
-
-        foreach (var src in _clipboard.Paths)
-        {
-            string name = Path.GetFileName(src);
-            string dest = Path.Combine(destDir, name);
-
-            if (File.Exists(dest) || Directory.Exists(dest))
-            {
-                // 同名が存在する場合はスキップ
-                continue;
-            }            
-
-            if (_clipboard.Operation == FileOperation.Copy)
-            {
-                if (Directory.Exists(src))
-                {
-                    // ディレクトリ
-                    // 未実装
-                    continue;
-                }
-                else if (File.Exists(src))
-                {
-                    // ファイル
-                    File.Copy(src, dest, overwrite: false);
-                }                
-            }
-            else if (_clipboard.Operation == FileOperation.Cut)
-            {
-                if (Directory.Exists(src))
-                {
-                    // ディレクトリ
-                    Directory.Move(src, dest);
-                }
-                else if (File.Exists(src))
-                {
-                    // ファイル
-                    File.Move(src, dest);
-                }                
-            }
-        }
-
-        _clipboard.Paths.Clear();
-        _clipboard.Operation = FileOperation.None;
-
-        // 既存の一覧更新処理
-        SetFileListViewDirectory(_fileListViewCurrentDirectory);
-    }
-    // コンテキストメニュー表示前処理
-    void FileContextMenu_Opening(object sender, RoutedEventArgs e)
-    {
-        var menu = (ContextMenu)sender;
-
-        var copy = (MenuItem)menu.Items[0];
-        var cut  = (MenuItem)menu.Items[1];
-        var paste = (MenuItem)menu.Items[3];
-
-        // メニュー項目の有効/無効設定
-
-        // ディレクトリはコピー不可とする
-
-        var paths = FileListView.SelectedItems
-            .Cast<FileItem>()
-            .Select(x => x.FullPath)
-            .ToList();
-
-        bool hasFile = false;
-        bool hasDirectory = false;
-
-        foreach (var path in paths)
-        {
-            if (File.Exists(path))
-                hasFile = true;
-            else if (Directory.Exists(path))
-                hasDirectory = true;
-        }
-
-        copy.IsEnabled =
-            paths.Count > 0 &&
-            hasFile &&
-            !hasDirectory;
-
-        cut.IsEnabled =
-            paths.Count > 0;
-
-        paste.IsEnabled =
-            _clipboard.Operation != FileOperation.None &&
-            paths.Count == 0;
-    }
-    // 右クリックで項目を選択状態にする
-    void FileListView_MouseRightButtonUp(object sender, MouseButtonEventArgs e)
-    {
-        DependencyObject? current = e.OriginalSource as DependencyObject;
-
-        while (current != null && current is not ListViewItem)
-        {
-            current = VisualTreeHelper.GetParent(current);
-        }
-
-        if (current is ListViewItem item)
-        {
-            item.IsSelected = true;
-        }
-    }
-    /*
-    * 新しいいフォルダ作成・名前変更
-    */
-    // 新しいフォルダ作成
-    private void NewFolder_Click(object sender, RoutedEventArgs e)
-    {
-        CreateNewDirectory();
-    }
-    // 名前変更
-    private void Rename_Click(object sender, RoutedEventArgs e)
-    {
-        if (FileListView.SelectedItem is FileItem item)
-            RenameItem(item);
-    }
-    // 仮名ディレクトリ名生成
-    private string CreateUniqueFolderName(string basePath, string baseName = "NewFolder")
-    {
-        string path = Path.Combine(basePath, baseName);
-        int index = 1;
-
-        while (Directory.Exists(path))
-        {
-            path = Path.Combine(basePath, $"{baseName} ({index})");
-            index++;
-        }
-        return path;
-    }
-    // 名前変更ダイアログ表示
-    private void CreateNewDirectory()
-    {
-        string parent = AddressBarCurrentDirectory;
-        string tempPath = CreateUniqueFolderName(parent);
-
-        try
-        {
-            Directory.CreateDirectory(tempPath);
-
-            var dlg = new RenameDialog(Path.GetFileName(tempPath))
-            {
-                Owner = this
-            };
-
-            if (dlg.ShowDialog() == true)
-            {
-                string newPath = Path.Combine(parent, dlg.ResultName);
-                if (tempPath != newPath)
-                    Directory.Move(tempPath, newPath);
-            }
-            else
-            {
-                // キャンセル時は削除
-                Directory.Delete(tempPath);
-            }
-
-            SetFileListViewDirectory(_fileListViewCurrentDirectory);
-        }
-        catch (Exception ex)
-        {
-            MessageBox.Show(ex.Message, "ディレクトリ作成エラー");
-        }
-    }
-    // 名前変更処理
-    private void RenameItem(FileItem item)
-    {
-        var dlg = new RenameDialog(item.Name)
-        {
-            Owner = this
-        };
-
-        if (dlg.ShowDialog() != true)
-            return;
-
-        string newPath = Path.Combine(
-            Path.GetDirectoryName(item.FullPath)!,
-            dlg.ResultName);
-
-        try
-        {
-            if (Directory.Exists(item.FullPath))
-                Directory.Move(item.FullPath, newPath);
-            else if (File.Exists(item.FullPath))
-                File.Move(item.FullPath, newPath);
-
-            SetFileListViewDirectory(_fileListViewCurrentDirectory);
-        }
-        catch (Exception ex)
-        {
-            MessageBox.Show(ex.Message, "名前の変更エラー");
-        }
     }
 
 }

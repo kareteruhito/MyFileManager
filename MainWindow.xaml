@@ -17,24 +17,24 @@
 
     <DockPanel>
 
-        <!-- メニュー ここから-->
+        <!-- メインメニュー ここから-->
         <Menu
             DockPanel.Dock="Top">
             <MenuItem Header="_File">
-                <MenuItem Header="_New Window" Click="OnNewWindow"/>
+                <MenuItem Header="_New Window" Click="Menu_OnNewWindow"/>
                 <Separator/>
-                <MenuItem Header="_Exit" Click="OnExit"/>
+                <MenuItem Header="_Exit" Click="Menu_OnExit"/>
             </MenuItem>
 
             <MenuItem Header="_View">
-                <MenuItem Header="Refresh" Click="OnRefresh"/>
+                <MenuItem Header="Refresh" Click="Menu_OnRefresh"/>
             </MenuItem>
 
             <MenuItem Header="_Help">
-                <MenuItem Header="_About" Click="OnAbout"/>
+                <MenuItem Header="_About" Click="Menu_OnAbout"/>
             </MenuItem>
         </Menu>
-        <!-- メニュー ここまで-->
+        <!-- メインメニュー ここまで-->
 
         <!-- ステータスバー -->
         <StatusBar
@@ -119,7 +119,6 @@
                     x:Name="FileListView"
                     Grid.Column="2"
                     MouseRightButtonUp="FileListView_MouseRightButtonUp"
-                    SelectionChanged="FileListView_SelectionChanged"
                     MouseDoubleClick="FileListView_MouseDoubleClick">
 
                     <!-- コンテキストメニュー ここから -->
@@ -127,12 +126,12 @@
                         <ContextMenu x:Name="FileContextMenu"
                                      Opened="FileContextMenu_Opening">
                             <MenuItem Header="コピー"
-                                Click="Copy_Click"/>
+                                Click="Menu_Copy_Click"/>
                             <MenuItem Header="切り取り"
-                                Click="Cut_Click"/>
+                                Click="Menu_Cut_Click"/>
                             <Separator/>
                             <MenuItem Header="貼り付け"
-                                Click="Paste_Click"/>
+                                Click="Menu_Paste_Click"/>
                             <Separator/>
                             <MenuItem Header="開く"
                                 Click="Menu_Open_Click" />
@@ -142,9 +141,9 @@
                             <MenuItem Header="削除"
                                 Click="Menu_Delete_Click" />
                             <MenuItem Header="新しいフォルダ"
-                                    Click="NewFolder_Click"/>
+                                    Click="Menu_NewFolder_Click"/>
                             <MenuItem Header="名前の変更"
-                                    Click="Rename_Click"/>
+                                    Click="Menu_Rename_Click"/>
                         </ContextMenu>
                     </ListView.ContextMenu>
                     <!-- コンテキストメニュー ここまで -->

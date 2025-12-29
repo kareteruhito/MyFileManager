@@ -10,12 +10,12 @@ namespace MyFileManager;
 
 public partial class MainWindow : Window
 {
-    public string AddressBarCurrentDirectory { get; private set; } = "";
 
     private void UpButton_Click(object sender, RoutedEventArgs e)
     {
-        var path = Path.GetDirectoryName(AddressBarCurrentDirectory) ?? AddressBarCurrentDirectory;
-        SetAddressBarCurrentDirectory(path);
+        var path = GetFileListViewCurrentDirectory();
+        var parent = Path.GetDirectoryName(path) ?? path;
+        UpdateCurrentDirectory(parent);
     }
 
     private void MoveButton_Click(object sender, RoutedEventArgs e)
@@ -36,7 +36,7 @@ public partial class MainWindow : Window
     {
         if (Directory.Exists(path))
         {
-            SetAddressBarCurrentDirectory(path);
+            UpdateCurrentDirectory(path);
         }
         else
         {
@@ -46,16 +46,5 @@ public partial class MainWindow : Window
                 MessageBoxButton.OK,
                 MessageBoxImage.Error);
         }
-    }
-
-    // アドレスバーのカレントディレクトリ設定
-    private void SetAddressBarCurrentDirectory(string path)
-    {
-        if (AddressBarCurrentDirectory == path) return;
-
-        AddressBarCurrentDirectory = path;
-        AddressTextBox.Text = path;
-
-        UpdateCurrentDirectory(path);
     }
 }
